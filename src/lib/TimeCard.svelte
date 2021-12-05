@@ -1,17 +1,32 @@
 <script>
+    import { selectTextOnFocus, blurOnEscape } from "./inputDirectives.js";
+
     let daysofweek = [
         ["1", "2", "3", "4", "5", "6", "7"],
         ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"],
+        [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ],
     ];
+
+    let dayName = 1;
 
     let h12 = true;
 
+    let minTime = 0;
+
     let days = [
-        { in: "", out: "", dow: 0 },
-        { in: "", out: "", dow: 1 },
-        { in: "", out: "", dow: 2 },
-        { in: "", out: "", dow: 3 },
-        { in: "", out: "", dow: 4 },
+        { in: "", out: "", inAM: true, outAM: false, dow: 0 },
+        { in: "", out: "", inAM: true, outAM: false, dow: 1 },
+        { in: "", out: "", inAM: true, outAM: false, dow: 2 },
+        { in: "", out: "", inAM: true, outAM: false, dow: 3 },
+        { in: "", out: "", inAM: true, outAM: false, dow: 4 },
     ];
 
     export let gridDim = [6, 3];
@@ -25,17 +40,53 @@
         return parseInt(time);
     };
 
-    const interpretTime = (index, isIn) => {
+    const interpretTime = (
+        /** @type {number} */ index,
+        /** @type {boolean} */ isIn
+    ) => {
         let time = isIn ? days[index].in : days[index].out;
+        // selects non digits
+        let regex = /[^0-9]+/g;
+        time = time.replace(regex, "");
+
         if (h12) {
-            // handle only hour input
+            // handle h
+            if (parseInt(time) >= 1 && parseInt(time) <= 12) {
+                if (isIn) days[index].in = time + ":00";
+                else days[index].out = time + ":00";
+                return;
+            }
+
+            // handle hhmm
             if (
-                Number.isInteger(parseInt(time)) &&
-                parseInt(time) >= 1 &&
-                parseInt(time) <= 12
+                parseInt(time.substr(0, 2)) >= 11 &&
+                parseInt(time.substr(0, 2)) <= 12 &&
+                parseInt(time.substr(2, 2)) >= 0 &&
+                parseInt(time.substr(2, 2)) <= 59
             ) {
-                if (isIn) days[index].in = parseInt(time) + ":00";
-                else days[index].out = parseInt(time) + ":00";
+                if (isIn)
+                    days[index].in =
+                        time.substr(0, 2) + ":" + time.substr(2, 2);
+                else
+                    days[index].out =
+                        time.substr(0, 2) + ":" + time.substr(2, 2);
+                return;
+            }
+
+            // handle hmm
+            if (
+                parseInt(time[0]) >= 1 &&
+                parseInt(time[0]) <= 9 &&
+                parseInt(time.substr(1, 2)) >= 0 &&
+                parseInt(time.substr(1, 2)) <= 59
+            ) {
+                // if hm with no trailing 0
+                if (time.length == 2) {
+                    if (parseInt(time[1]) <= 5) time += "0";
+                    else time = time[0] + "0" + time[1];
+                }
+                if (isIn) days[index].in = time[0] + ":" + time.substr(1, 2);
+                else days[index].out = time[0] + ":" + time.substr(1, 2);
                 return;
             }
         } else {
@@ -45,8 +96,8 @@
                 parseInt(time) >= 0 &&
                 parseInt(time) <= 23
             ) {
-                if (isIn) days[index].in = parseInt(time) + ":00";
-                else days[index].out = parseInt(time) + ":00";
+                if (isIn) days[index].in = time + ":00";
+                else days[index].out = time + ":00";
                 return;
                 // interpret 24 input as 00 next day
             } else if (parseInt(time) === 24) {
@@ -61,13 +112,41 @@
         else days[index].out = "";
     };
 
-    let timeDiff = 0;
+    let timeSum = 0;
     const calcHours = () => {
-        timeDiff = 0;
+        timeSum = 0;
         days.forEach((day) => {
-            timeDiff += timeToNum(day.out) - timeToNum(day.in);
+            let timeDiff = 0;
+            if (day.in === "" || day.out === "") return;
+            let timeIn;
+            let timeOut;
+            if (h12) {
+                // convert to 24h
+                timeIn = day.inAM
+                    ? day.in
+                    : parseInt(day.in.split(":")[0]) +
+                      12 +
+                      ":" +
+                      day.in.split(":")[1];
+                timeOut = day.outAM
+                    ? day.out
+                    : parseInt(day.out.split(":")[0]) +
+                      12 +
+                      ":" +
+                      day.out.split(":")[1];
+            }
+            let dateIn = new Date("01/01/1970 " + timeIn);
+            let dateOut = new Date("01/01/1970 " + timeOut);
+            timeDiff =
+                dateOut.getHours() * 60 -
+                dateIn.getHours() * 60 +
+                (dateOut.getMinutes() - dateIn.getMinutes());
+            if (timeDiff < minTime * 60) {
+                timeSum += minTime * 60;
+                return;
+            }
+            timeSum += timeDiff;
         });
-        // console.log(timeDiff);
     };
 
     const shiftDays = () => {
@@ -82,6 +161,8 @@
             days.push({
                 in: "",
                 out: "",
+                inAM: true,
+                outAM: false,
                 dow: (days[days.length - 1].dow + 1) % 7,
             });
             gridDim[0]++;
@@ -102,6 +183,9 @@
         });
         days = days;
     };
+    const dayNameCycle = () => {
+        dayName = (dayName + 1) % daysofweek.length;
+    };
 </script>
 
 <div>
@@ -117,12 +201,14 @@
         <div><h3>Out</h3></div>
         {#each days as day, index (index)}
             <div>
-                <h3>{daysofweek[1][day.dow]}</h3>
+                <h3>{daysofweek[dayName][day.dow]}</h3>
             </div>
             <div>
                 <input
                     type="text"
                     bind:value={day.in}
+                    use:selectTextOnFocus
+                    use:blurOnEscape
                     on:change={() => {
                         interpretTime(index, true);
                         calcHours();
@@ -133,6 +219,8 @@
                 <input
                     type="text"
                     bind:value={day.out}
+                    use:selectTextOnFocus
+                    use:blurOnEscape
                     on:change={() => {
                         interpretTime(index, false);
                         calcHours();
@@ -145,8 +233,13 @@
         <button on:click={removeDay}>Remove Day</button>
     </div>
     <button on:click={clearFields}>Clear Fields</button>
+    <button on:click={dayNameCycle}>Change Day Naming</button>
 
-    <div>{timeDiff}</div>
+    <label for="minTime">Minimum Hours per Day</label>
+    <input type="number" id="minTime" bind:value={minTime} />
+
+    <div>{Math.round(timeSum / 60 * 100)/100} hours </div>
+    <div>{Math.floor(timeSum / 60)} hours {timeSum % 60} minutes</div>
     <input type="checkbox" name="" id="12h" bind:checked={h12} />
     <label for="12h">12 Hour</label>
 </div>
