@@ -1,5 +1,12 @@
 <script>
     import { selectTextOnFocus, blurOnEscape } from "./inputDirectives.js";
+    import AmPmButton from "../assets/AmPmButton.svelte";
+
+    export let daysInWeek = 5;
+
+    let gridDim = [daysInWeek + 1, 3];
+    $: col = `repeat(${gridDim[1]}, 1fr)`;
+    $: row = `repeat(${gridDim[0]}, 1fr)`;
 
     let daysofweek = [
         ["1", "2", "3", "4", "5", "6", "7"],
@@ -21,24 +28,21 @@
 
     let minTime = 0;
 
-    let days = [
-        { in: "", out: "", inAM: true, outAM: false, dow: 0 },
-        { in: "", out: "", inAM: true, outAM: false, dow: 1 },
-        { in: "", out: "", inAM: true, outAM: false, dow: 2 },
-        { in: "", out: "", inAM: true, outAM: false, dow: 3 },
-        { in: "", out: "", inAM: true, outAM: false, dow: 4 },
-    ];
+    let days = [];
 
-    export let gridDim = [6, 3];
-    $: col = `repeat(${gridDim[1]}, 1fr)`;
-    $: row = `repeat(${gridDim[0]}, 1fr)`;
+    for (let i = 0; i < daysInWeek; i++) {
+        days.push({ in: "", out: "", dow: i });
+    }
 
-    const timeToNum = (time) => {
-        if (time === "") {
-            return 0;
-        }
-        return parseInt(time);
-    };
+    let daysInAM = [];
+    let daysOutAM = [];
+    // let daysInAM = [];
+    // let daysOutAM = [];
+
+    for (let i = 0; i < daysInWeek; i++) {
+        daysInAM[i] = true;
+        daysOutAM[i] = false;
+    }
 
     const interpretTime = (
         /** @type {number} */ index,
@@ -165,6 +169,8 @@
                 outAM: false,
                 dow: (days[days.length - 1].dow + 1) % 7,
             });
+            daysInAM[daysInAM.length] = true;
+            daysOutAM[daysOutAM.length] = true;
             gridDim[0]++;
         }
         days = days;
@@ -174,6 +180,8 @@
             days.pop();
             gridDim[0]--;
         }
+        daysInAM.pop();
+        daysOutAM.pop();
         days = days;
     };
     const clearFields = () => {
@@ -189,6 +197,7 @@
 </script>
 
 <div>
+    <div style="display: contents;" />
     <div
         class="container"
         style="
@@ -214,6 +223,10 @@
                         calcHours();
                     }}
                 />
+                <div style="display: {h12 ? 'inline' : 'none'}">
+                    <AmPmButton value={index} bind:bindGroup={daysInAM} />
+                </div>
+                {daysInAM[index] ? "AM" : "PM"}
             </div>
             <div>
                 <input
@@ -226,6 +239,10 @@
                         calcHours();
                     }}
                 />
+                <div style="display: {h12 ? 'inline' : 'none'}">
+                    <AmPmButton value={index} bind:bindGroup={daysOutAM} />
+                </div>
+                {daysOutAM[index] ? "AM" : "PM"}
             </div>
         {/each}
         <button on:click={shiftDays}>Shift Days</button>
@@ -238,7 +255,7 @@
     <label for="minTime">Minimum Hours per Day</label>
     <input type="number" id="minTime" bind:value={minTime} />
 
-    <div>{Math.round(timeSum / 60 * 100)/100} hours </div>
+    <div>{Math.round((timeSum / 60) * 100) / 100} hours</div>
     <div>{Math.floor(timeSum / 60)} hours {timeSum % 60} minutes</div>
     <input type="checkbox" name="" id="12h" bind:checked={h12} />
     <label for="12h">12 Hour</label>

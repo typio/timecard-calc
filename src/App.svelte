@@ -1,10 +1,10 @@
 <script>
     import TimeCard from "./lib/TimeCard.svelte";
-    let timecard = [6, 3];
+    let daysInWeek = 5;
 </script>
 
 <main>
-    <TimeCard {timecard} />
+    <TimeCard daysInWeek={daysInWeek} />
 </main>
 
 <style>
