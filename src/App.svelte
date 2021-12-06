@@ -4,6 +4,7 @@
 </script>
 
 <main>
+    <img src="src\assets\TimeCardLogo.png" style="width:10em" alt="Time Card Logo">
     <TimeCard daysInWeek={daysInWeek} />
 </main>
 

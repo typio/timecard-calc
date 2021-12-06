@@ -1,6 +1,6 @@
 <script>
     import { selectTextOnFocus, blurOnEscape } from "./inputDirectives.js";
-    import AmPmButton from "../assets/AmPmButton.svelte";
+    import AmPmButton from "./AmPmButton.svelte";
 
     export let daysInWeek = 5;
 
