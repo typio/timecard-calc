@@ -3,7 +3,7 @@
 ## Usage
 View [Time Card Calculator](https://projects.tohuber.com/timecard/) online!
 
-## Features in future versions
+## Features for future versions
 - 2/+ time cards in calculation
 - Save values in local storage
 - Multiple pay periods per day (for breaks)
