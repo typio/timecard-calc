@@ -46,10 +46,10 @@
         let regex = /[^0-9]+/g;
         time = time.replace(regex, "");
 
-        // removes leading zeros
-        time = time.replace(/\b0+/g, '');
-
         if (h12) {
+            // removes leading zeros
+            time = time.replace(/\b0+/g, "");
+
             // handle h
             if (parseInt(time) >= 1 && parseInt(time) <= 12) {
                 if (isIn) days[index].in = time + ":00";
@@ -132,18 +132,31 @@
             // read time
             if (h12) {
                 // convert to 24h
-                timeIn = daysInAM[days.indexOf(day)]
-                    ? day.in
-                    : parseInt(day.in.split(":")[0]) +
-                      12 +
-                      ":" +
-                      day.in.split(":")[1];
-                timeOut = daysOutAM[days.indexOf(day)]
-                    ? day.out
-                    : parseInt(day.out.split(":")[0]) +
-                      12 +
-                      ":" +
-                      day.out.split(":")[1];
+                if (parseInt(day.in.split(":")[0]) === 12) {
+                    timeIn = daysInAM[days.indexOf(day)]
+                        ? "0:" + parseInt(day.in.split(":")[1])
+                        : day.in;
+                } else {
+                    timeIn = daysInAM[days.indexOf(day)]
+                        ? day.in
+                        : parseInt(day.in.split(":")[0]) +
+                          12 +
+                          ":" +
+                          day.in.split(":")[1];
+                }
+
+                if (parseInt(day.out.split(":")[0]) === 12) {
+                    timeOut = daysOutAM[days.indexOf(day)]
+                        ? "0:" + parseInt(day.out.split(":")[1])
+                        : day.out;
+                } else {
+                    timeOut = daysOutAM[days.indexOf(day)]
+                        ? day.out
+                        : parseInt(day.out.split(":")[0]) +
+                          12 +
+                          ":" +
+                          day.out.split(":")[1];
+                }
             } else {
                 timeIn = day.in;
                 timeOut = day.out;
@@ -239,7 +252,10 @@
                         calcHours();
                     }}
                 />
-                <div class="AMPMToggle" style="display: {h12 ? 'flex' : 'none'}">
+                <div
+                    class="AMPMToggle"
+                    style="display: {h12 ? 'flex' : 'none'}"
+                >
                     <AmPmButton
                         value={index}
                         bind:bindGroup={daysInAM}
@@ -302,7 +318,6 @@
         margin: 0;
         background-color: antiquewhite;
     }
-
 
     .container input {
         padding: 0;
