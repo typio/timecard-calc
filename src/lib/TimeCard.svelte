@@ -205,11 +205,11 @@
         if (days.length > 1) {
             days.pop();
             gridDim[0]--;
+            daysInAM.pop();
+            daysOutAM.pop();
+            days = days;
+            daysInWeek--;
         }
-        daysInAM.pop();
-        daysOutAM.pop();
-        days = days;
-        daysInWeek--;
     };
     const clearFields = () => {
         days.forEach((day) => {
@@ -302,6 +302,9 @@
 </div>
 
 <style>
+    button {
+        height: 3em;
+    }
     .container {
         width: fit-content;
         min-height: fit-content;

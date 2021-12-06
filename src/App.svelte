@@ -4,7 +4,7 @@
 </script>
 
 <main>
-    <img src="./images/TimeCardLogo.png" style="width:10em" alt="Time Card Logo">
+    <!-- <img src="./favicons/favicon-192.png" style="width:10em" alt="Time Card Logo"> -->
     <TimeCard daysInWeek={daysInWeek} />
 </main>
 
