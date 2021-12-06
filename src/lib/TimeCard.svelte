@@ -34,15 +34,8 @@
         days.push({ in: "", out: "", dow: i });
     }
 
-    let daysInAM = [];
-    let daysOutAM = [];
-    // let daysInAM = [];
-    // let daysOutAM = [];
-
-    for (let i = 0; i < daysInWeek; i++) {
-        daysInAM[i] = true;
-        daysOutAM[i] = false;
-    }
+    $: daysInAM = new Array(daysInWeek).fill(true);
+    $: daysOutAM = new Array(daysInWeek).fill(false);
 
     const interpretTime = (
         /** @type {number} */ index,
@@ -52,6 +45,9 @@
         // selects non digits
         let regex = /[^0-9]+/g;
         time = time.replace(regex, "");
+
+        // removes leading zeros
+        time = time.replace(/\b0+/g, '');
 
         if (h12) {
             // handle h
@@ -63,11 +59,16 @@
 
             // handle hhmm
             if (
-                parseInt(time.substr(0, 2)) >= 11 &&
+                parseInt(time.substr(0, 2)) >= 10 &&
                 parseInt(time.substr(0, 2)) <= 12 &&
                 parseInt(time.substr(2, 2)) >= 0 &&
                 parseInt(time.substr(2, 2)) <= 59
             ) {
+                // if hhm with no trailing 0
+                if (time.length == 3) {
+                    if (parseInt(time[2]) <= 5) time += "0";
+                    else time = time.substr(0, 2) + "0" + time[2];
+                }
                 if (isIn)
                     days[index].in =
                         time.substr(0, 2) + ":" + time.substr(2, 2);
@@ -116,6 +117,9 @@
         else days[index].out = "";
     };
 
+    // @ts-ignore
+    $: daysInAM, daysOutAM, minTime, calcHours();
+
     let timeSum = 0;
     const calcHours = () => {
         timeSum = 0;
@@ -124,27 +128,34 @@
             if (day.in === "" || day.out === "") return;
             let timeIn;
             let timeOut;
+
+            // read time
             if (h12) {
                 // convert to 24h
-                timeIn = day.inAM
+                timeIn = daysInAM[days.indexOf(day)]
                     ? day.in
                     : parseInt(day.in.split(":")[0]) +
                       12 +
                       ":" +
                       day.in.split(":")[1];
-                timeOut = day.outAM
+                timeOut = daysOutAM[days.indexOf(day)]
                     ? day.out
                     : parseInt(day.out.split(":")[0]) +
                       12 +
                       ":" +
                       day.out.split(":")[1];
+            } else {
+                timeIn = day.in;
+                timeOut = day.out;
             }
+
             let dateIn = new Date("01/01/1970 " + timeIn);
             let dateOut = new Date("01/01/1970 " + timeOut);
+            if (dateOut < dateIn) {
+                dateOut.setDate(2);
+            }
             timeDiff =
-                dateOut.getHours() * 60 -
-                dateIn.getHours() * 60 +
-                (dateOut.getMinutes() - dateIn.getMinutes());
+                Math.abs(dateIn.getTime() - dateOut.getTime()) / 1000 / 60;
             if (timeDiff < minTime * 60) {
                 timeSum += minTime * 60;
                 return;
@@ -161,6 +172,7 @@
     };
 
     const addDay = () => {
+        daysInWeek++;
         if (days.length < 7) {
             days.push({
                 in: "",
@@ -169,10 +181,11 @@
                 outAM: false,
                 dow: (days[days.length - 1].dow + 1) % 7,
             });
-            daysInAM[daysInAM.length] = true;
-            daysOutAM[daysOutAM.length] = true;
+            daysInAM.push(true);
+            daysOutAM.push(false);
             gridDim[0]++;
         }
+
         days = days;
     };
     const removeDay = () => {
@@ -183,12 +196,15 @@
         daysInAM.pop();
         daysOutAM.pop();
         days = days;
+        daysInWeek--;
     };
     const clearFields = () => {
         days.forEach((day) => {
             day.in = "";
             day.out = "";
         });
+        daysInAM = new Array(daysInWeek).fill(true);
+        daysOutAM = new Array(daysInWeek).fill(false);
         days = days;
     };
     const dayNameCycle = () => {
@@ -223,10 +239,14 @@
                         calcHours();
                     }}
                 />
-                <div style="display: {h12 ? 'inline' : 'none'}">
-                    <AmPmButton value={index} bind:bindGroup={daysInAM} />
+                <div class="AMPMToggle" style="display: {h12 ? 'flex' : 'none'}">
+                    <AmPmButton
+                        value={index}
+                        bind:bindGroup={daysInAM}
+                        on:click={calcHours}
+                    />
                 </div>
-                {daysInAM[index] ? "AM" : "PM"}
+                <!-- {daysInAM[index] ? "AM" : "PM"} -->
             </div>
             <div>
                 <input
@@ -239,10 +259,14 @@
                         calcHours();
                     }}
                 />
-                <div style="display: {h12 ? 'inline' : 'none'}">
-                    <AmPmButton value={index} bind:bindGroup={daysOutAM} />
+                <div style="display: {h12 ? 'flex' : 'none'}">
+                    <AmPmButton
+                        value={index}
+                        bind:bindGroup={daysOutAM}
+                        on:click={calcHours}
+                    />
                 </div>
-                {daysOutAM[index] ? "AM" : "PM"}
+                <!-- {daysOutAM[index] ? "AM" : "PM"} -->
             </div>
         {/each}
         <button on:click={shiftDays}>Shift Days</button>
@@ -255,17 +279,13 @@
     <label for="minTime">Minimum Hours per Day</label>
     <input type="number" id="minTime" bind:value={minTime} />
 
-    <div>{Math.round((timeSum / 60) * 100) / 100} hours</div>
+    <div>{(Math.round((timeSum / 60) * 100) / 100).toFixed(2)} hours</div>
     <div>{Math.floor(timeSum / 60)} hours {timeSum % 60} minutes</div>
     <input type="checkbox" name="" id="12h" bind:checked={h12} />
     <label for="12h">12 Hour</label>
 </div>
 
 <style>
-    .container div {
-        background-color: antiquewhite;
-    }
-
     .container {
         width: fit-content;
         min-height: fit-content;
@@ -273,5 +293,22 @@
         border: 1px solid #999;
         grid-gap: 1px;
         background: #999;
+    }
+
+    .container div {
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        margin: 0;
+        background-color: antiquewhite;
+    }
+
+
+    .container input {
+        padding: 0;
+        margin: 0;
+        text-align: center;
+        font-size: inherit;
+        user-select: none;
     }
 </style>
