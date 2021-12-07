@@ -3,12 +3,14 @@
     import AmPmButton from "./AmPmButton.svelte";
 
     export let daysInWeek = 5;
-
-    let gridDim = [daysInWeek + 1, 3];
-    $: col = `repeat(${gridDim[1]}, 1fr)`;
-    $: row = `repeat(${gridDim[0]}, 1fr)`;
-
-    let daysofweek = [
+    export let days;
+    export let daysInAM;
+    export let daysOutAM;
+    export let h12;
+    export let minTime;
+    export let dayName;
+    export let timeSum = 0;
+    export let daysofweek = [
         ["1", "2", "3", "4", "5", "6", "7"],
         ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"],
         [
@@ -22,20 +24,45 @@
         ],
     ];
 
-    let dayName = 1;
+    let gridDim = [daysInWeek + 1, 3];
+    $: col = `repeat(${gridDim[1]}, 1fr)`;
+    $: row = `repeat(${gridDim[0]}, 1fr)`;
 
-    let h12 = true;
+    const shiftDays = () => {
+        days.forEach((day) => {
+            day.dow = (day.dow + 1) % 7;
+        });
+        days = days;
+    };
 
-    let minTime = 0;
+    const addDay = () => {
+        daysInWeek++;
+        if (days.length < 7) {
+            days.push({
+                in: "",
+                out: "",
+                inAM: true,
+                outAM: false,
+                dow: (days[days.length - 1].dow + 1) % 7,
+            });
+            daysInAM.push(true);
+            daysOutAM.push(false);
+            gridDim[0]++;
+        }
 
-    let days = [];
-
-    for (let i = 0; i < daysInWeek; i++) {
-        days.push({ in: "", out: "", dow: i });
-    }
-
-    $: daysInAM = new Array(daysInWeek).fill(true);
-    $: daysOutAM = new Array(daysInWeek).fill(false);
+        days = days;
+    };
+    const removeDay = () => {
+        if (days.length > 1) {
+            days.pop();
+            gridDim[0]--;
+            daysInAM.pop();
+            daysOutAM.pop();
+            days = days;
+            daysInWeek--;
+        }
+    };
+ 
 
     const interpretTime = (
         /** @type {number} */ index,
@@ -120,7 +147,6 @@
     // @ts-ignore
     $: daysInAM, daysOutAM, minTime, calcHours();
 
-    let timeSum = 0;
     const calcHours = () => {
         timeSum = 0;
         days.forEach((day) => {
@@ -175,53 +201,6 @@
             }
             timeSum += timeDiff;
         });
-    };
-
-    const shiftDays = () => {
-        days.forEach((day) => {
-            day.dow = (day.dow + 1) % 7;
-        });
-        days = days;
-    };
-
-    const addDay = () => {
-        daysInWeek++;
-        if (days.length < 7) {
-            days.push({
-                in: "",
-                out: "",
-                inAM: true,
-                outAM: false,
-                dow: (days[days.length - 1].dow + 1) % 7,
-            });
-            daysInAM.push(true);
-            daysOutAM.push(false);
-            gridDim[0]++;
-        }
-
-        days = days;
-    };
-    const removeDay = () => {
-        if (days.length > 1) {
-            days.pop();
-            gridDim[0]--;
-            daysInAM.pop();
-            daysOutAM.pop();
-            days = days;
-            daysInWeek--;
-        }
-    };
-    const clearFields = () => {
-        days.forEach((day) => {
-            day.in = "";
-            day.out = "";
-        });
-        daysInAM = new Array(daysInWeek).fill(true);
-        daysOutAM = new Array(daysInWeek).fill(false);
-        days = days;
-    };
-    const dayNameCycle = () => {
-        dayName = (dayName + 1) % daysofweek.length;
     };
 </script>
 
@@ -289,16 +268,10 @@
         <button on:click={addDay}>Add Day</button>
         <button on:click={removeDay}>Remove Day</button>
     </div>
-    <button on:click={clearFields}>Clear Fields</button>
-    <button on:click={dayNameCycle}>Change Day Naming</button>
-
-    <label for="minTime">Minimum Hours per Day</label>
-    <input type="number" id="minTime" bind:value={minTime} />
+    
 
     <div>{(Math.round((timeSum / 60) * 100) / 100).toFixed(2)} hours</div>
     <div>{Math.floor(timeSum / 60)} hours {timeSum % 60} minutes</div>
-    <input type="checkbox" name="" id="12h" bind:checked={h12} />
-    <label for="12h">12 Hour</label>
 </div>
 
 <style>
