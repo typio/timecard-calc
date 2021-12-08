@@ -62,7 +62,6 @@
             daysInWeek--;
         }
     };
- 
 
     const interpretTime = (
         /** @type {number} */ index,
@@ -204,7 +203,7 @@
     };
 </script>
 
-<div>
+<div class="card">
     <div style="display: contents;" />
     <div
         class="container"
@@ -268,16 +267,35 @@
         <button on:click={addDay}>Add Day</button>
         <button on:click={removeDay}>Remove Day</button>
     </div>
-    
 
-    <div>{(Math.round((timeSum / 60) * 100) / 100).toFixed(2)} hours</div>
-    <div>{Math.floor(timeSum / 60)} hours {timeSum % 60} minutes</div>
+    <div class="hourtotals">
+        <div>{(Math.round((timeSum / 60) * 100) / 100).toFixed(2)} hours</div>
+        <div>{Math.floor(timeSum / 60)} hours {timeSum % 60} minutes</div>
+    </div>
 </div>
 
 <style>
+    .card {
+        padding: 2em;
+        margin-bottom: 1em;
+        border-radius: 20px;
+        background-color: #f5f5f5;
+    }
+
+    .hourtotals {
+        display:flex;
+        justify-content: center;
+        
+    }
+
+    .hourtotals div {
+        padding: 0 1em 0 1em;
+    }
+
     button {
         height: 3em;
     }
+
     .container {
         width: fit-content;
         min-height: fit-content;

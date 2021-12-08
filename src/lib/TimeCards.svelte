@@ -85,25 +85,76 @@
             bind:timeSum={timeSums[index]}
         />
     {/each}
-    <input type="checkbox" name="" id="12h" bind:checked={h12} />
-    <label for="12h">12 Hour</label>
-
-    <label for="minTime">Minimum Hours per Day</label>
-    <input type="number" id="minTime" bind:value={minTime} />
-
-    <button on:click={clearFields}>Clear Fields</button>
-    <button on:click={dayNameCycle}>Change Day Naming</button>
-    <button on:click={addWeek}>Add Week</button>
-    <button on:click={removeWeek}>Remove Week</button>
-    <div>
-        {(
-            Math.round((timeSums.reduce((a, b) => a + b, 0) / 60) * 100) / 100
-        ).toFixed(2)} hours
+    <div class="bottomstuff">
+        <div class="totaltimes">
+            Totals:
+            <div>
+                {(
+                    Math.round(
+                        (timeSums.reduce((a, b) => a + b, 0) / 60) * 100
+                    ) / 100
+                ).toFixed(2)} hours
+            </div>
+            <div>
+                {Math.floor(timeSums.reduce((a, b) => a + b, 0) / 60)} hours {timeSums.reduce(
+                    (a, b) => a + b,
+                    0
+                ) % 60} minutes
+            </div>
+        </div>
     </div>
-    <div>
-        {Math.floor(timeSums.reduce((a, b) => a + b, 0) / 60)} hours {timeSums.reduce(
-            (a, b) => a + b,
-            0
-        ) % 60} minutes
+    <div class="options">
+        <div>
+            <input type="checkbox" name="" id="12h" bind:checked={h12} />
+            <label for="12h">12 Hour</label>
+        </div>
+        <div>
+            <label for="minTime">Minimum Hours per Day:</label>
+            <input type="number" id="minTime" style="width:4em;" bind:value={minTime} />
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button on:click={clearFields}>Clear Fields</button>
+        <button on:click={dayNameCycle}>Change Day Naming</button>
+        <button on:click={addWeek}>Add Week</button>
+        <button on:click={removeWeek}>Remove Week</button>
     </div>
 </main>
+
+<style>
+    .bottomstuff {
+        display: flex;
+    }
+
+    .totaltimes {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .totaltimes div {
+        padding: 0 1em 0 1em;
+    }
+
+    .options {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .options div {
+        padding: 0 1em 0 1em;
+    }
+
+    .buttons {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .buttons button {
+        margin: 0 1em 0 1em;
+    }
+</style>
