@@ -174,7 +174,7 @@
 
     svg {
         display: flex;
-        width: 4em;
+        width: 3em;
         padding: 0;
         margin: 0;
     }

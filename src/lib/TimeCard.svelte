@@ -219,7 +219,10 @@
             <div>
                 <h3>{daysofweek[dayName][day.dow]}</h3>
             </div>
-            <div>
+            <div
+                style="height: 3em;
+            background: #bc4749;"
+            >
                 <input
                     type="text"
                     bind:value={day.in}
@@ -232,7 +235,7 @@
                 />
                 <div
                     class="AMPMToggle"
-                    style="display: {h12 ? 'flex' : 'none'}"
+                    style="display: {h12 ? 'flex' : 'none'}; background: #bc4749;"
                 >
                     <AmPmButton
                         value={index}
@@ -242,7 +245,10 @@
                 </div>
                 <!-- {daysInAM[index] ? "AM" : "PM"} -->
             </div>
-            <div>
+            <div
+                style="height: 3em;
+            background: #bc4749;"
+            >
                 <input
                     type="text"
                     bind:value={day.out}
@@ -253,7 +259,7 @@
                         calcHours();
                     }}
                 />
-                <div style="display: {h12 ? 'flex' : 'none'}">
+                <div style="display: {h12 ? 'flex' : 'none'}; background: #bc4749;">
                     <AmPmButton
                         value={index}
                         bind:bindGroup={daysOutAM}
@@ -269,27 +275,24 @@
     </div>
 
     <div class="hourtotals">
-        <div>{(Math.round((timeSum / 60) * 100) / 100).toFixed(2)} hours</div>
-        <div>{Math.floor(timeSum / 60)} hours {timeSum % 60} minutes</div>
+        <p>Total:</p>
+        <p>{(Math.round((timeSum / 60) * 100) / 100).toFixed(2)} hours</p>
+        <p>{Math.floor(timeSum / 60)} hours {timeSum % 60} minutes</p>
     </div>
 </div>
 
 <style>
     .card {
-        padding: 2em;
+        padding: 32px;
         margin-bottom: 1em;
         border-radius: 20px;
-        background-color: #f5f5f5;
+        background-color: #6a994e;
+        box-shadow: 0px 5px 5px #ddd;
     }
 
     .hourtotals {
-        display:flex;
+        display: flex;
         justify-content: center;
-        
-    }
-
-    .hourtotals div {
-        padding: 0 1em 0 1em;
     }
 
     button {
@@ -300,24 +303,54 @@
         width: fit-content;
         min-height: fit-content;
         display: grid;
-        border: 1px solid #999;
-        grid-gap: 1px;
-        background: #999;
+        border: 6px solid #bc4749;
+        grid-gap: 6px;
+        background: #bc4749;
     }
 
     .container div {
         display: flex;
         justify-content: center;
+        align-items: center;
         padding: 0;
         margin: 0;
-        background-color: antiquewhite;
+        background-color: #386641;
+        height: 3em;
     }
 
     .container input {
         padding: 0;
-        margin: 0;
+        margin: 0 6px 0 0;
         text-align: center;
         font-size: inherit;
         user-select: none;
+        height: 100%;
+        border-width: 0;
+    }
+
+    .container h3 {
+        color: #f2e8cf;
+        font-weight: 900;
+    }
+
+    .container button {
+        background-color: #f2e8cf;
+        color: #386641;
+        border-radius: 6px;
+        border: none;
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: 900;
+    }
+
+    .hourtotals {
+        margin: 20px 0 0 0;
+        background: #386641;
+    }
+
+    .hourtotals p {
+        color: #f2e8cf;
+        border: none;
+        font-weight: 900;
+        padding: 0 20px 0 20px;
     }
 </style>

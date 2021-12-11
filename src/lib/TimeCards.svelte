@@ -8,7 +8,7 @@
     let h12 = true;
 
     let minTime = 0;
-    let weekNum = 2;
+    let weekNum = 1;
     let weeks = [];
     let weeksInAM = [];
     let weeksOutAM = [];
@@ -87,44 +87,53 @@
     {/each}
     <div class="bottomstuff">
         <div class="totaltimes">
-            Totals:
-            <div>
+            <p>Every Week Total:</p>
+            <p>
                 {(
                     Math.round(
                         (timeSums.reduce((a, b) => a + b, 0) / 60) * 100
                     ) / 100
                 ).toFixed(2)} hours
-            </div>
-            <div>
+            </p>
+            <p>
                 {Math.floor(timeSums.reduce((a, b) => a + b, 0) / 60)} hours {timeSums.reduce(
                     (a, b) => a + b,
                     0
                 ) % 60} minutes
+            </p>
+        </div>
+
+        <div class="options">
+            <div>
+                <input type="checkbox" name="" id="12h" bind:checked={h12} on:change={clearFields} />
+                <label for="12h">12 Hour</label>
+            </div>
+            <div>
+                <label for="minTime">Minimum Hours per Day:</label>
+                <input
+                    type="number"
+                    id="minTime"
+                    style="width:4em;"
+                    bind:value={minTime}
+                />
             </div>
         </div>
-    </div>
-    <div class="options">
-        <div>
-            <input type="checkbox" name="" id="12h" bind:checked={h12} />
-            <label for="12h">12 Hour</label>
-        </div>
-        <div>
-            <label for="minTime">Minimum Hours per Day:</label>
-            <input type="number" id="minTime" style="width:4em;" bind:value={minTime} />
-        </div>
-    </div>
 
-    <div class="buttons">
-        <button on:click={clearFields}>Clear Fields</button>
-        <button on:click={dayNameCycle}>Change Day Naming</button>
-        <button on:click={addWeek}>Add Week</button>
-        <button on:click={removeWeek}>Remove Week</button>
+        <div class="buttons">
+            <button on:click={clearFields}>Clear Fields</button>
+            <button on:click={dayNameCycle}>Change Days</button>
+            <button on:click={addWeek}>Add Week</button>
+            <button on:click={removeWeek}>Remove Week</button>
+        </div>
     </div>
 </main>
 
 <style>
     .bottomstuff {
-        display: flex;
+        box-shadow: 0px 5px 5px #ddd;
+        background: #386641;
+        padding: 20px;
+        border-radius: 20px;
     }
 
     .totaltimes {
@@ -132,9 +141,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-    }
-    .totaltimes div {
-        padding: 0 1em 0 1em;
     }
 
     .options {
@@ -150,11 +156,39 @@
 
     .buttons {
         width: 100%;
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-column-gap: 16px;
         align-items: center;
         justify-content: center;
     }
+
     .buttons button {
-        margin: 0 1em 0 1em;
+        background-color: #f2e8cf;
+        color: #386641;
+        border-radius: 6px;
+        border: none;
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: 900;
+        padding: 10px;
+    }
+
+    .bottomstuff p {
+        padding: 0 20px 0 20px;
+        margin: 0;
+    }
+
+    .bottomstuff p,
+    label,
+    input {
+        color: #f2e8cf;
+        border: none;
+        font-weight: 900;
+        margin: 0 0 10px 0;
+    }
+
+    input {
+        font-weight:normal;
+        color: #000;
     }
 </style>
